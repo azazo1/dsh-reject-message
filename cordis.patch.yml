@@ -1,0 +1,8 @@
+# dsh-reject-message bundle patch
+#
+# Inserts the plugin row into the web profile roster. The row runs the host
+# half (exports ".") in the host process and the browser half (exports
+# "./client") in the web GUI.
+- insert:
+    - id: dsh-reject-message
+      name: 'dsh-reject-message'

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "policy": "dsh-plugin-naming/v1",
+  "plugin": {
+    "namespace": "azazo1",
+    "name": "reject-message",
+    "coordinate": "azazo1/reject-message",
+    "packageName": "dsh-reject-message"
+  },
+  "names": {
+    "pluginNames": ["dsh-reject-message"],
+    "loaderIds": ["dsh-reject-message"],
+    "services": ["rejectMessage"],
+    "tools": [],
+    "commands": [],
+    "skills": [],
+    "skillProviders": [],
+    "events": [],
+    "settingsNamespaces": [],
+    "routes": []
+  }
+}
