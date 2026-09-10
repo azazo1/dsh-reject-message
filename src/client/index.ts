@@ -41,9 +41,9 @@ export function apply(ctx: ClientContext): void {
       isPendingApproval(pendingInteraction) ? pendingInteraction : null
     ),
     locale: NS,
-    children: {
-      'conversation.approval.detail': { kind: 'single', scope: 'session' },
-    },
+    // 不再声明 `conversation.approval.detail`: 一个 slot 只允许有一个 entry 声明,
+    // 原生 ui-approval 已经声明了它, 重复声明会让后注册的一方抛错并拖垮整个
+    // client boot. 我们只渲染, 声明权留给原生.
   }, RejectPanel))
 
   ctx.effect(async () => {
