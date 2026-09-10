@@ -1,7 +1,7 @@
 {
   "name": "dsh-reject-message",
   "version": "0.1.0",
-  "description": "Take over the native DSH approval window so a reject can carry a description the model will see.",
+  "description": "Take over the native DSH approval window and plan review card so a reject can carry a description the model will see.",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -90,6 +90,7 @@
     "dsh-plugin",
     "deepseek-harness",
     "approval",
+    "plan",
     "reject",
     "web-ui"
   ]

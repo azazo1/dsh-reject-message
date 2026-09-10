@@ -1,8 +1,9 @@
 /**
  * dsh-reject-message 浏览器半区.
  *
- * 以低于原生 ui-approval 的 composer 优先级接管 PendingApproval, 复用同一张
- * 提权卡片; 点拒绝后切到可填写描述的拒绝窗口, 再经 Remote 交给 Host.
+ * 以低于原生 ui-approval / ui-user-questions 的 composer 优先级接管
+ * PendingApproval 和 plan-review; 提权拒绝经 Remote 交给 Host, plan 拒绝
+ * 走 questions 的 custom.
  */
 
 import {
@@ -11,9 +12,10 @@ import {
   REMOTE_NAMESPACE,
 } from '../shared.ts'
 import type { ClientContext, RejectMessageRemoteFace } from './context.ts'
+import { ComposerPanel } from './ComposerPanel.tsx'
 import { en, zh } from './locales.ts'
-import { isPendingApproval } from './pending.ts'
-import { RejectPanel, setRecordReject } from './RejectPanel.tsx'
+import { selectComposerPending } from './pending.ts'
+import { setRecordReject } from './RejectPanel.tsx'
 import { injectStyles } from './styles.ts'
 
 const NS = PLUGIN_NAME
@@ -26,7 +28,7 @@ function unwrapRecorded(result: Awaited<ReturnType<RejectMessageRemoteFace['reco
 }
 
 /**
- * 注入样式, 注册拒绝窗口文案, 接管审批 composer, 并挂上 Remote.
+ * 注入样式, 注册拒绝窗口文案, 接管审批和 plan-review composer, 并挂上 Remote.
  * @param ctx - Web Client 插件上下文.
  */
 export function apply(ctx: ClientContext): void {
@@ -36,15 +38,15 @@ export function apply(ctx: ClientContext): void {
 
   ctx.slots.inject('conversation.composer', () => ctx.slots.register({
     name: 'conversation.composer',
-    priority: 0,
+    priority: -1,
     select: ({ pendingInteraction }: { pendingInteraction?: unknown }) => (
-      isPendingApproval(pendingInteraction) ? pendingInteraction : null
+      selectComposerPending(pendingInteraction)
     ),
     locale: NS,
     // 不声明 conversation.approval.detail: 0.1.5 起一个 slot 只允许一个
     // entry 声明, 原生 ui-approval 已经声明了它. 重复声明会让后注册的一方
     // 抛错; 在全局 / main 配置下会拖垮整个 client boot.
-  }, RejectPanel))
+  }, ComposerPanel))
 
   ctx.effect(async () => {
     const dispose = await ctx.remote.$mount(REJECT_REMOTE_CONTRIBUTION)

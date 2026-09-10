@@ -1,6 +1,6 @@
 import { STYLE_ATTR, STYLE_ID } from '../shared.ts'
 
-/** 原生提权窗口同款卡片, 外加拒绝描述输入. */
+/** 原生提权 / plan 审查窗口同款卡片, 外加拒绝描述输入. */
 const CSS_TEXT = `
 .drm-root {
   display: flex;
@@ -68,6 +68,13 @@ const CSS_TEXT = `
   white-space: pre-wrap;
   word-break: break-all;
 }
+.drm-plan {
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .drm-hint {
   color: var(--dsw-alias-label-tertiary);
   font-size: 13px;
@@ -98,6 +105,9 @@ const CSS_TEXT = `
   justify-content: flex-end;
   gap: 8px;
   padding: 14px 16px;
+}
+.drm-root[data-plan-review-key] .drm-actions {
+  padding: 8px 16px 12px;
 }
 .drm-btn {
   display: inline-flex;
@@ -135,6 +145,13 @@ const CSS_TEXT = `
   background: var(--dsw-alias-interactive-bg-hover-danger);
   color: var(--dsw-alias-state-error-primary);
   border-color: transparent;
+}
+.drm-btn-discuss {
+  gap: 6px;
+  color: var(--dsw-alias-label-secondary);
+}
+.drm-btn-discuss:hover:not(:disabled) {
+  color: var(--dsw-alias-label-primary);
 }
 `
 
