@@ -65,6 +65,7 @@ const CSS_TEXT = `
   font-family: var(--ds-font-family-code);
   font-size: 13px;
   line-height: 20px;
+  white-space: pre-wrap;
   word-break: break-all;
 }
 .drm-hint {

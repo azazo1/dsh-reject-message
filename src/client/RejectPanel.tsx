@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { normalizeRejectMessage } from '../shared.ts'
+import { commandOf, type UseChat } from './command.ts'
 import type { PendingApprovalView } from './pending.ts'
 import type { RejectMessageKey } from './locales.ts'
 
@@ -33,10 +34,18 @@ export function setRecordReject(next: RecordRejectFn | undefined): void {
 export interface RejectPanelProps {
   /** 选中的原生审批. */
   matched: PendingApprovalView
-  /** 原生审批详情 slot, 例如 bash 命令. */
-  renderSlot: (name: string, owner: { callId: string }) => ReactNode
   /** 本插件 locale 命名空间. */
   t: (key: RejectMessageKey, params?: Record<string, string>) => string
+  /**
+   * Session scope 的 chat 读数. 审批详情 slot 由原生 ui-approval 声明,
+   * 本插件不再声明它, 改为自己从 chat 快照里取命令.
+   */
+  useChat?: UseChat
+}
+
+/** 有 chat 读数时才挂载, 组件内部无条件调用 hook. */
+function CommandDetail({ callId, useChat }: { callId: string; useChat: UseChat }) {
+  return <>{useChat(snapshot => commandOf(snapshot, callId))}</>
 }
 
 /**
@@ -45,9 +54,9 @@ export interface RejectPanelProps {
  */
 export function RejectPanel(props: RejectPanelProps) {
   const approval = props.matched
-  const detail = approval.callId === undefined
+  const detail = approval.callId === undefined || props.useChat === undefined
     ? null
-    : props.renderSlot('conversation.approval.detail', { callId: approval.callId })
+    : <CommandDetail callId={approval.callId} useChat={props.useChat} />
   return (
     <RejectFlow
       key={approval.key}
