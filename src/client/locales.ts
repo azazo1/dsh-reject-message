@@ -22,6 +22,9 @@ export const zh = {
   'plan.rejectHint': '可填写拒绝原因, 模型会看到这段描述. 留空则按普通拒绝处理.',
   'plan.rejectPlaceholder': '拒绝原因 (可选)',
   'plan.reject.aria': '拒绝描述',
+  copy: '复制',
+  copied: '已复制',
+  'markdown.footnotes': '脚注',
 } satisfies Record<string, string>
 
 /** 拒绝窗口词典 key. */
@@ -49,4 +52,7 @@ export const en = {
   'plan.rejectHint': 'You can add a reject description. The model will see it. Leave empty to reject without a note.',
   'plan.rejectPlaceholder': 'Reject description (optional)',
   'plan.reject.aria': 'Reject description',
+  copy: 'Copy',
+  copied: 'Copied',
+  'markdown.footnotes': 'Footnotes',
 } satisfies Record<RejectMessageKey, string>

@@ -3,7 +3,8 @@
  * 拒绝则进入同款窗口填写描述, 经 questions 的 custom 交给模型.
  */
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import { normalizeRejectMessage } from '../shared.ts'
 import type { RejectMessageKey } from './locales.ts'
 import {
@@ -65,6 +66,10 @@ function PlanRejectFlow({ pending, reviewId, plan, approveLabel, declineLabel, t
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const noteRef = useRef<HTMLTextAreaElement>(null)
+  const markdownLabels = useMemo(() => ({
+    code: { copyLabel: t('copy'), copiedLabel: t('copied') },
+    footnotes: t('markdown.footnotes'),
+  }), [t])
 
   useEffect(() => {
     if (phase !== 'reject') return
@@ -94,7 +99,9 @@ function PlanRejectFlow({ pending, reviewId, plan, approveLabel, declineLabel, t
   }
 
   const planBody = (
-    <div className="drm-plan">{plan}</div>
+    <div className="drm-plan">
+      <MarkdownText text={plan} labels={markdownLabels} />
+    </div>
   )
 
   if (phase === 'reject') {

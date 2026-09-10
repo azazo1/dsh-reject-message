@@ -72,8 +72,6 @@ const CSS_TEXT = `
   color: var(--dsw-alias-label-primary);
   font-size: 14px;
   line-height: 22px;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 .drm-hint {
   color: var(--dsw-alias-label-tertiary);

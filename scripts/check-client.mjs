@@ -42,6 +42,7 @@ if (handoff.id !== pluginId) {
 const require = createRequire(import.meta.url)
 const exports = handoff.factory((spec) => {
   if (spec === 'react' || spec === 'react/jsx-runtime') return require(spec)
+  if (spec === '@deepseek-ai/dsh-client-ui-primitives') return { MarkdownText: () => null }
   throw new Error(`unexpected require: ${spec}`)
 })
 

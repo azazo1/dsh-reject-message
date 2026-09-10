@@ -20,7 +20,10 @@
       "patch": "./cordis.patch.yml"
     },
     "client": {
-      "platform": "web"
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-primitives"
+      ]
     }
   },
   "files": [
@@ -52,6 +55,7 @@
     "@deepseek-ai/dsh-tools": "0.1.5-rc.1",
     "@deepseek-ai/dsh-typert-protocol": "0.1.5-rc.1",
     "@deepseek-ai/dsh-typert-registry": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.1.5-rc.1",
     "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
@@ -70,6 +74,9 @@
     "@deepseek-ai/dsh-typert-registry": {
       "optional": true
     },
+    "@deepseek-ai/dsh-client-ui-primitives": {
+      "optional": true
+    },
     "react": {
       "optional": true
     }
@@ -80,6 +87,7 @@
     "@deepseek-ai/dsh-tools": "^0.1.5-rc.1",
     "@deepseek-ai/dsh-typert-protocol": "^0.1.5-rc.1",
     "@deepseek-ai/dsh-typert-registry": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.5-rc.1",
     "@types/node": "^22.19.0",
     "@types/react": "^18.3.1",
     "react": "^18.3.1",
