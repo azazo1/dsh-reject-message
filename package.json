@@ -48,10 +48,10 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-llm": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-typert-protocol": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-typert-registry": "^0.1.2-rc.1",
+    "@deepseek-ai/dsh-llm": "*",
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/dsh-typert-protocol": "*",
+    "@deepseek-ai/dsh-typert-registry": "*",
     "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
@@ -75,11 +75,11 @@
     }
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-llm": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-typert-protocol": "^0.1.2-rc.1",
-    "@deepseek-ai/dsh-typert-registry": "^0.1.2-rc.1",
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-llm": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-tools": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-typert-registry": "^0.1.5-rc.1",
     "@types/node": "^22.19.0",
     "@types/react": "^18.3.1",
     "react": "^18.3.1",
