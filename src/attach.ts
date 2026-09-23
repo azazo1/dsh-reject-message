@@ -51,7 +51,11 @@ export function attachRejectMessage(
 
   const extra = createUserMessage({
     content: [{ type: 'text', text: formatRejectNote(exec.name, note) }],
-    source: { kind: 'plugin', plugin: PLUGIN_NAME },
+    source: {
+      kind: PLUGIN_NAME,
+      form: 'notice',
+      summary: `The user rejected ${exec.name}.`,
+    },
   })
   const additionalContexts = [...existingContexts(downstream), extra]
 

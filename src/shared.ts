@@ -2,6 +2,13 @@
  * Host / Client 共用的包名, 拒绝描述契约和 Remote 描述符.
  * codec 只依赖 schema.parse, 不引入 zod, 避免 Client bundle 打进额外运行时.
  */
+import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    'dsh-reject-message': { kind: 'dsh-reject-message' } & ContextFormed
+  }
+}
 
 /** 插件包名, Client loader 注册 id, Loader row 名共用. */
 export const PLUGIN_ID = 'dsh-reject-message'
@@ -107,7 +114,8 @@ function parseRecordRejectResult(value: unknown): RecordRejectResult {
 }
 
 function strictCodec(typeSymbol: string, parse: (value: unknown) => unknown) {
-  return { mode: 'strict' as const, typeSymbol, schema: { parse } }
+  const schema = { parse }
+  return { mode: 'strict' as const, typeSymbol, create: () => schema }
 }
 
 const recordArgsCodec = strictCodec('dsh-reject-message#RecordRejectArgs', parseRecordRejectArgs)
