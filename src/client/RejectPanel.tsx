@@ -1,8 +1,10 @@
 /**
  * 原生提权窗口的接管实现: 允许一次仍直接放行, 拒绝则进入同款拒绝窗口填写描述.
+ * 卡片结构, 原子组件与键盘行为对齐原生 ApprovalPanel.
  */
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { Button, StateDot } from '@deepseek-ai/dsh-client-ui-primitives'
 import { normalizeRejectMessage } from '../shared.ts'
 import { commandOf, type UseChat } from './command.ts'
 import type { PendingApprovalView } from './pending.ts'
@@ -41,6 +43,8 @@ export interface RejectPanelProps {
    * 本插件不再声明它, 改为自己从 chat 快照里取命令.
    */
   useChat?: UseChat
+  /** entry inject 提供的本地化原因解析, 与原生审批卡同一读法. */
+  resolveReason?: (reason: Readonly<Record<string, string>>) => string
 }
 
 /** 有 chat 读数时才挂载, 组件内部无条件调用 hook. */
@@ -57,38 +61,58 @@ export function RejectPanel(props: RejectPanelProps) {
   const detail = approval.callId === undefined || props.useChat === undefined
     ? null
     : <CommandDetail callId={approval.callId} useChat={props.useChat} />
+  const reason = approval.displayReason !== undefined && props.resolveReason !== undefined
+    ? props.resolveReason(approval.displayReason)
+    : approval.reason
   return (
     <RejectFlow
       key={approval.key}
       pending={approval}
       detail={detail}
+      reason={reason}
       t={props.t}
     />
   )
 }
 
-function RejectFlow({ pending, detail, t }: {
+function RejectFlow({ pending, detail, reason, t }: {
   pending: PendingApprovalView
   detail: ReactNode
+  reason: string | undefined
   t: RejectPanelProps['t']
 }) {
   const [phase, setPhase] = useState<'ask' | 'reject'>('ask')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const noteRef = useRef<HTMLTextAreaElement>(null)
+  const active = useRef(true)
+  const waiting = useRef(false)
+  const composing = useRef(false)
+  const compositionEnded = useRef(false)
+
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
 
   useEffect(() => {
     if (phase !== 'reject') return
     noteRef.current?.focus()
   }, [phase])
 
-  const finish = (outcome: 'allowed-once' | 'rejected', run?: () => Promise<void>): void => {
+  const answerable = pending.answerable !== false
+
+  const answer = (outcome: 'allowed-once' | 'rejected', run?: () => Promise<void>): void => {
+    if (waiting.current || pending.answerable === false) return
+    waiting.current = true
     setBusy(true)
     void (async () => {
       try {
         if (run !== undefined) await run()
         await pending.answer(outcome)
       } catch {
+        if (!active.current || pending.answerable === false) return
+        waiting.current = false
         setBusy(false)
       }
     })()
@@ -96,7 +120,7 @@ function RejectFlow({ pending, detail, t }: {
 
   const confirmReject = (): void => {
     const message = normalizeRejectMessage(note)
-    finish('rejected', message === undefined ? undefined : async () => {
+    answer('rejected', message === undefined ? undefined : async () => {
       try {
         await recordReject({
           sessionId: pending.sessionId,
@@ -113,7 +137,23 @@ function RejectFlow({ pending, detail, t }: {
   const onNoteKey = (event: KeyboardEvent<HTMLTextAreaElement>): void => {
     if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey)) return
     event.preventDefault()
-    if (!busy) confirmReject()
+    confirmReject()
+  }
+
+  const keydown = (event: KeyboardEvent<HTMLDivElement>): void => {
+    if (phase !== 'ask') return
+    const element = event.target as Element
+    if (event.defaultPrevented || !event.currentTarget.contains(document.activeElement)
+      || element.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""]') !== null) return
+    if (event.key !== 'Enter' && event.key !== 'Escape') return
+    if (event.key === 'Enter' && element.closest('button, a[href], [role="button"]') !== null) return
+    if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+    event.preventDefault()
+    event.stopPropagation()
+    // oxlint-disable-next-line typescript/no-deprecated -- IME 229 covers engines without isComposing.
+    if (event.repeat || composing.current || compositionEnded.current || event.nativeEvent.isComposing || event.keyCode === 229) return
+    if (event.key === 'Enter') answer('allowed-once')
+    else setPhase('reject')
   }
 
   if (phase === 'reject') {
@@ -121,11 +161,11 @@ function RejectFlow({ pending, detail, t }: {
       <div className="drm-root" data-approval-key={pending.key} data-reject-mode="">
         <div className="drm-card">
           <div className="drm-strip">
-            <span className="drm-dot" />
+            <StateDot state={busy ? 'ongoing' : 'warning'} />
             {t('rejectWaiting')}
           </div>
           <div className="drm-body" data-approval-scroll="" tabIndex={0} role="group" aria-label={t('reject.aria')}>
-            <div className="drm-headline">{pending.reason ?? t('escalation', { toolName: pending.toolName })}</div>
+            <div className="drm-headline">{reason ?? t('escalation', { toolName: pending.toolName })}</div>
             {detail !== null && <div className="drm-command">{detail}</div>}
             <div className="drm-hint">{t('rejectHint')}</div>
             <textarea
@@ -139,22 +179,12 @@ function RejectFlow({ pending, detail, t }: {
             />
           </div>
           <div className="drm-actions">
-            <button
-              type="button"
-              className="drm-btn drm-btn-outline"
-              disabled={busy}
-              onClick={() => { setPhase('ask') }}
-            >
+            <Button variant="outline" disabled={busy} onClick={() => { setPhase('ask') }}>
               {t('rejectBack')}
-            </button>
-            <button
-              type="button"
-              className="drm-btn drm-btn-outline drm-btn-reject"
-              disabled={busy}
-              onClick={confirmReject}
-            >
+            </Button>
+            <Button variant="outline" className="drm-reject" disabled={busy} onClick={confirmReject}>
               {t('rejectConfirm')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -162,33 +192,40 @@ function RejectFlow({ pending, detail, t }: {
   }
 
   return (
-    <div className="drm-root" data-approval-key={pending.key}>
+    <div
+      className="drm-root"
+      data-approval-key={pending.key}
+      aria-busy={busy}
+      onKeyDown={keydown}
+      onKeyUpCapture={() => { compositionEnded.current = false }}
+      onCompositionStartCapture={() => { composing.current = true }}
+      onCompositionEndCapture={() => { composing.current = false; compositionEnded.current = true }}
+    >
       <div className="drm-card">
         <div className="drm-strip">
-          <span className="drm-dot" />
+          <StateDot state={busy ? 'ongoing' : 'warning'} />
           {t('waiting')}
         </div>
         <div className="drm-body" data-approval-scroll="" tabIndex={0} role="group" aria-label={t('detail.aria')}>
-          <div className="drm-headline">{pending.reason ?? t('escalation', { toolName: pending.toolName })}</div>
+          <div className="drm-headline">{reason ?? t('escalation', { toolName: pending.toolName })}</div>
           {detail !== null && <div className="drm-command">{detail}</div>}
         </div>
         <div className="drm-actions">
-          <button
-            type="button"
-            className="drm-btn drm-btn-outline drm-btn-reject"
-            disabled={busy}
+          <Button
+            variant="outline"
+            className="drm-reject"
+            disabled={busy || !answerable}
             onClick={() => { setPhase('reject') }}
           >
             {t('reject')}
-          </button>
-          <button
-            type="button"
-            className="drm-btn drm-btn-primary"
-            disabled={busy}
-            onClick={() => { finish('allowed-once') }}
+          </Button>
+          <Button
+            variant="primary"
+            disabled={busy || !answerable}
+            onClick={() => { answer('allowed-once') }}
           >
             {t('allowOnce')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

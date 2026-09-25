@@ -17,6 +17,10 @@ export interface PendingApprovalView {
   readonly callId?: string
   /** 原生审批展示的原因. */
   readonly reason?: string
+  /** 请求方给出的本地化原因, 原生卡优先展示它. */
+  readonly displayReason?: Readonly<Record<string, string>>
+  /** 结算前后的可答状态, 缺省视为可答. */
+  readonly answerable?: boolean
   /** 把用户决定交回 Host waterfall. */
   answer(outcome: 'allowed-once' | 'rejected'): Promise<void>
 }
@@ -59,10 +63,6 @@ export interface ParsedPlanReview {
   pending: PendingPlanReviewView
   /** 审查问题 id. */
   reviewId: string
-  /** 待审计划正文. */
-  plan: string
-  /** 确认执行的 option label. */
-  approveLabel: string
   /** Keep planning 的 option label. */
   declineLabel: string
 }
@@ -90,6 +90,14 @@ export function isPendingApproval(value: unknown): value is PendingApprovalView 
     && typeof item.sessionId === 'string'
     && typeof item.toolName === 'string'
     && typeof item.answer === 'function'
+}
+
+/**
+ * 提取可接管的原生审批, 其余交给下游.
+ * @param value - conversation.composer 的 pendingInteraction.
+ */
+export function selectApproval(value: unknown): PendingApprovalView | null {
+  return isPendingApproval(value) ? value : null
 }
 
 /**
@@ -128,38 +136,8 @@ export function parsePlanReview(value: unknown): ParsedPlanReview | undefined {
   return {
     pending: item as unknown as PendingPlanReviewView,
     reviewId: question.id,
-    plan: question.detail,
-    approveLabel,
     declineLabel,
   }
-}
-
-/**
- * 判断当前 composer pending 是不是可接管的 plan-review.
- * @param value - conversation.composer 的 pendingInteraction.
- */
-export function isPendingPlanReview(value: unknown): value is PendingPlanReviewView {
-  return parsePlanReview(value) !== undefined
-}
-
-/**
- * composer 入口: 提权审批或标准 plan-review, 其余交给下游.
- * @param value - conversation.composer 的 pendingInteraction.
- */
-export function selectComposerPending(
-  value: unknown,
-): PendingApprovalView | PendingPlanReviewView | null {
-  if (isPendingApproval(value)) return value
-  return parsePlanReview(value)?.pending ?? null
-}
-
-/**
- * 组装确认执行的答案, 不带 custom.
- * @param reviewId - 审查问题 id.
- * @param approveLabel - 确认执行的 option label.
- */
-export function approvePlanAnswer(reviewId: string, approveLabel: string): PlanReviewAnswer {
-  return { answers: [{ id: reviewId, selected: [approveLabel] }] }
 }
 
 /**

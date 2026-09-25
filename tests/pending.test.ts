@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
-  approvePlanAnswer,
   isPendingApproval,
   keepPlanningAnswer,
   parsePlanReview,
-  selectComposerPending,
+  selectApproval,
 } from '../src/client/pending.ts'
 
 const planQuestions = () => [{
@@ -51,12 +50,29 @@ describe('isPendingApproval', () => {
   })
 })
 
+describe('selectApproval', () => {
+  it('returns the approval carrier', () => {
+    const approval = {
+      kind: 'approval' as const,
+      key: 'approval:1',
+      sessionId: 's1',
+      toolName: 'bash',
+      answer: async () => {},
+    }
+    assert.equal(selectApproval(approval), approval)
+  })
+
+  it('returns null for a plan-review and other pending', () => {
+    assert.equal(selectApproval(planCarrier()), null)
+    assert.equal(selectApproval({ kind: 'question' }), null)
+    assert.equal(selectApproval(null), null)
+  })
+})
+
 describe('parsePlanReview', () => {
   it('accepts a native-shaped binary plan-review', () => {
     const parsed = parsePlanReview(planCarrier())
     assert.equal(parsed?.reviewId, 'plan-review')
-    assert.equal(parsed?.plan.startsWith('# Ship'), true)
-    assert.equal(parsed?.approveLabel, 'Approve')
     assert.equal(parsed?.declineLabel, 'Keep planning')
     assert.equal(parsed?.pending.key, 'question:1')
   })
@@ -108,36 +124,7 @@ describe('parsePlanReview', () => {
   })
 })
 
-describe('selectComposerPending', () => {
-  it('returns the approval carrier', () => {
-    const approval = {
-      kind: 'approval' as const,
-      key: 'approval:1',
-      sessionId: 's1',
-      toolName: 'bash',
-      answer: async () => {},
-    }
-    assert.equal(selectComposerPending(approval), approval)
-  })
-
-  it('returns the same plan-review object', () => {
-    const carrier = planCarrier()
-    assert.equal(selectComposerPending(carrier), carrier)
-  })
-
-  it('returns null for other pending', () => {
-    assert.equal(selectComposerPending({ kind: 'question' }), null)
-    assert.equal(selectComposerPending(null), null)
-  })
-})
-
-describe('plan review answers', () => {
-  it('approves without custom', () => {
-    assert.deepEqual(approvePlanAnswer('plan-review', 'Approve'), {
-      answers: [{ id: 'plan-review', selected: ['Approve'] }],
-    })
-  })
-
+describe('keepPlanningAnswer', () => {
   it('keeps planning without custom when the note is empty', () => {
     assert.deepEqual(keepPlanningAnswer('plan-review', 'Keep planning'), {
       answers: [{ id: 'plan-review', selected: ['Keep planning'] }],

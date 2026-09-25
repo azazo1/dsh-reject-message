@@ -1,6 +1,9 @@
 import { STYLE_ATTR, STYLE_ID } from '../shared.ts'
 
-/** 原生提权 / plan 审查窗口同款卡片, 外加拒绝描述输入. */
+/**
+ * 原生提权卡同款骨架, 外加拒绝描述输入与 plan 卡上的拒绝入口.
+ * 按钮与状态点用原生原子组件, 这里只保留卡片布局和原生没有的部分.
+ */
 const CSS_TEXT = `
 .drm-root {
   display: flex;
@@ -13,7 +16,7 @@ const CSS_TEXT = `
   width: 100%;
   max-width: var(--dsh-chat-content-width);
   border: 1px solid var(--dsw-alias-state-warn-secondary);
-  border-radius: 20px;
+  border-radius: var(--dsw-radius-xl);
   background: var(--dsw-specific-input-major);
   box-shadow: var(--dsw-shadow-lv2);
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
@@ -35,15 +38,6 @@ const CSS_TEXT = `
 .drm-root[data-reject-mode] .drm-strip {
   background: var(--dsw-alias-state-error-tertiary, var(--dsw-alias-state-warn-tertiary));
   color: var(--dsw-alias-state-error-primary, var(--dsw-alias-state-warn-primary));
-}
-.drm-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--dsw-alias-state-warn-primary);
-}
-.drm-root[data-reject-mode] .drm-dot {
-  background: var(--dsw-alias-state-error-primary, var(--dsw-alias-state-warn-primary));
 }
 .drm-body {
   display: flex;
@@ -67,11 +61,6 @@ const CSS_TEXT = `
   line-height: 20px;
   white-space: pre-wrap;
   word-break: break-all;
-}
-.drm-plan {
-  color: var(--dsw-alias-label-primary);
-  font-size: 14px;
-  line-height: 22px;
 }
 .drm-hint {
   color: var(--dsw-alias-label-tertiary);
@@ -104,52 +93,29 @@ const CSS_TEXT = `
   gap: 8px;
   padding: 14px 16px;
 }
-.drm-root[data-plan-review-key] .drm-actions {
-  padding: 8px 16px 12px;
-}
-.drm-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 14px;
-  border: none;
-  border-radius: 18px;
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 22px;
-}
-.drm-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-.drm-btn-outline {
-  border: 0.5px solid var(--dsw-alias-border-l3);
-  background: transparent;
-}
-.drm-btn-outline:hover:not(:disabled) {
-  background: var(--dsw-alias-interactive-bg-hover);
-}
-.drm-btn-primary {
-  background: var(--dsw-alias-button-primary-fill);
-  color: var(--dsw-alias-label-primary-foreground);
-}
-.drm-btn-primary:hover:not(:disabled) {
-  background: var(--dsw-alias-button-primary-hover);
-}
-.drm-btn-reject:hover:not(:disabled) {
+.drm-root .drm-reject:hover:not(:disabled) {
   background: var(--dsw-alias-interactive-bg-hover-danger);
   color: var(--dsw-alias-state-error-primary);
   border-color: transparent;
 }
-.drm-btn-discuss {
-  gap: 6px;
-  color: var(--dsw-alias-label-secondary);
+.drm-plan-action {
+  display: inline-flex;
+  align-items: center;
 }
-.drm-btn-discuss:hover:not(:disabled) {
-  color: var(--dsw-alias-label-primary);
+.drm-plan-action > button.drm-plan-reject {
+  height: 24px;
+  padding: 0 8px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+}
+.drm-plan-action > button.drm-plan-reject:hover:not(:disabled) {
+  color: var(--dsw-alias-state-error-primary);
+}
+.drm-error {
+  margin: 8px 0 0;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 12px;
+  line-height: 18px;
 }
 `
 

@@ -9,6 +9,8 @@ export interface ClientContext {
   }
   locale: {
     register: (ns: string, dictionaries: Record<string, Record<string, string>>) => () => void
+    /** 按当前界面语言解析请求方给出的本地化文本, 与原生审批卡同一读法. */
+    resolveText: (text: Readonly<Record<string, string>>) => string
   }
   slots: {
     inject: (name: string, factory: () => unknown) => void

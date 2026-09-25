@@ -1,4 +1,4 @@
-/** `dsh-reject-message` 命名空间文案. 审批步复用原生提权窗口用词, plan 步对齐原生审查卡. */
+/** `dsh-reject-message` 命名空间文案. 审批步复用原生提权窗口用词, plan 步只提供拒绝入口的用词. */
 
 /** 简体中文词典, 也是 key 集合的来源. */
 export const zh = {
@@ -13,18 +13,13 @@ export const zh = {
   rejectConfirm: '确认拒绝',
   rejectBack: '返回',
   'reject.aria': '拒绝描述',
-  'plan.header': '计划待审',
-  'plan.approve': '确认执行',
-  'plan.decline': '拒绝',
-  'plan.discuss': '去聊天里说',
-  'plan.aria': '计划内容',
-  'plan.rejectWaiting': '拒绝此计划',
-  'plan.rejectHint': '可填写拒绝原因, 模型会看到这段描述. 留空则按普通拒绝处理.',
+  'plan.rejectAction': '拒绝',
+  'plan.rejectTitle': '拒绝此计划',
+  'plan.rejectHint': '可填写拒绝原因, 模型会看到这段描述. 留空则按 Keep planning 处理.',
   'plan.rejectPlaceholder': '拒绝原因 (可选)',
+  'plan.rejectConfirm': '确认拒绝',
+  'plan.rejectCancel': '取消',
   'plan.reject.aria': '拒绝描述',
-  copy: '复制',
-  copied: '已复制',
-  'markdown.footnotes': '脚注',
 } satisfies Record<string, string>
 
 /** 拒绝窗口词典 key. */
@@ -43,16 +38,11 @@ export const en = {
   rejectConfirm: 'Confirm reject',
   rejectBack: 'Back',
   'reject.aria': 'Reject description',
-  'plan.header': 'Plan review',
-  'plan.approve': 'Approve',
-  'plan.decline': 'Refuse',
-  'plan.discuss': 'Chat about it',
-  'plan.aria': 'Plan content',
-  'plan.rejectWaiting': 'Refuse this plan',
-  'plan.rejectHint': 'You can add a reject description. The model will see it. Leave empty to reject without a note.',
+  'plan.rejectAction': 'Refuse',
+  'plan.rejectTitle': 'Refuse this plan',
+  'plan.rejectHint': 'You can add a reject description. The model will see it. Leave empty to keep planning without a note.',
   'plan.rejectPlaceholder': 'Reject description (optional)',
+  'plan.rejectConfirm': 'Confirm reject',
+  'plan.rejectCancel': 'Cancel',
   'plan.reject.aria': 'Reject description',
-  copy: 'Copy',
-  copied: 'Copied',
-  'markdown.footnotes': 'Footnotes',
 } satisfies Record<RejectMessageKey, string>
