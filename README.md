@@ -16,6 +16,8 @@ plan 审查卡原生没有输入框. 本插件同样接管 `kind === 'plan-revie
 
 ## 安装
 
+Web 端装进 `web` profile:
+
 ```shell
 dsh plugin --profile web add azazo1/dsh-reject-message
 ```
@@ -32,7 +34,13 @@ dsh plugin --profile web add azazo1/dsh-reject-message#v0.1.0
 dsh plugin --profile web add "link:$(pwd)"
 ```
 
-装完重启 `dsh web`. 卸载: `dsh plugin --profile web remove dsh-reject-message`.
+装完重启 `dsh web`, 浏览器里刷新一次页面. 卸载: `dsh plugin --profile web remove dsh-reject-message`.
+
+桌面端装进 `desktop` profile. 它由 Electron 应用独占管理, `dsh plugin` 会拒绝 `--profile desktop`, 所以要用应用内的插件管理器: 在插件页的安装入口填上面命令里对应的包名或本地目录. 装上后重启应用, 窗口刷新一次.
+
+引擎版本线要求 `@deepseek-ai/dsh-*` 不低于 `0.1.7-rc.2`, 且仍在 `0.1.x` 上 (peerDependencies 与 devDependencies 都写作 `>=0.1.7-rc.2 <0.2.0`). 更早的引擎线装不上这个版本.
+
+web 与 desktop 两个 profile 跑的是同一套 Web 应用, 桌面端只是多起一个 Host 子进程并给 `<html>` 打上平台标记, 所以同一份包在两边通用, 不需要分别构建.
 
 开发检查: `just verify`.
 
