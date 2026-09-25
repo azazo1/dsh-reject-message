@@ -46,16 +46,17 @@ export function PlanRejectAction(props: PlanRejectActionProps) {
       key={props.requestKey}
       reviewId={props.review.id}
       declineLabel={decline.label}
-      answer={pending.answer}
+      // 原生 pending 的 answer 是类方法, 必须带接收者调用; 解构后传递会丢 this.
+      pending={pending}
       t={props.t}
     />
   )
 }
 
-function PlanRejectDialog({ reviewId, declineLabel, answer, t }: {
+function PlanRejectDialog({ reviewId, declineLabel, pending, t }: {
   reviewId: string
   declineLabel: string
-  answer: PendingPlanReviewView['answer']
+  pending: PendingPlanReviewView
   t: PlanRejectActionProps['t']
 }) {
   const [open, setOpen] = useState(false)
@@ -72,7 +73,7 @@ function PlanRejectDialog({ reviewId, declineLabel, answer, t }: {
     const message = normalizeRejectMessage(note)
     void (async () => {
       try {
-        await answer(keepPlanningAnswer(reviewId, declineLabel, message))
+        await pending.answer(keepPlanningAnswer(reviewId, declineLabel, message))
         setOpen(false)
       } catch (cause) {
         waiting.current = false
