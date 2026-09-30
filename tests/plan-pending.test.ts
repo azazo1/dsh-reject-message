@@ -18,7 +18,7 @@ const planCarrier = (sessionId: string, key: string) => ({
     intent: { kind: 'plan-review', approve: 'Approve' },
   }],
   answer: async () => {},
-  cancel: async () => {},
+  dismiss: async () => {},
 })
 
 const approvalCarrier = (sessionId: string, key: string) => ({

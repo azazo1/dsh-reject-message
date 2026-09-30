@@ -54,7 +54,9 @@ export interface PendingPlanReviewView {
   /** 把用户决定交回 user-questions waterfall. */
   answer(answer: PlanReviewAnswer): Promise<void>
   /** 关掉审查卡, 让用户回普通输入框. */
-  cancel(): Promise<void>
+  dismiss(): Promise<void>
+  /** 当前答案通道; rpc 通道答完后审查卡不会自己消失, 需要 dismiss. */
+  snapshot?(): { readonly channel?: string }
 }
 
 /** 从 plan-review pending 抽出的审查字段. */
@@ -110,7 +112,7 @@ export function parsePlanReview(value: unknown): ParsedPlanReview | undefined {
   if (item === undefined) return undefined
   if (item.kind !== 'plan-review') return undefined
   if (typeof item.key !== 'string' || typeof item.sessionId !== 'string') return undefined
-  if (typeof item.answer !== 'function' || typeof item.cancel !== 'function') return undefined
+  if (typeof item.answer !== 'function' || typeof item.dismiss !== 'function') return undefined
   if (!Array.isArray(item.questions) || item.questions.length !== 1) return undefined
 
   const question = asRecord(item.questions[0])

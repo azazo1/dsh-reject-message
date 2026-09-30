@@ -73,8 +73,11 @@ function PlanRejectDialog({ reviewId, declineLabel, pending, t }: {
     const message = normalizeRejectMessage(note)
     void (async () => {
       try {
+        // 与原生 PlanReviewPanel 一致: rpc 通道答完后卡片不会自动撤下, 需要 dismiss.
+        const remote = pending.snapshot?.().channel === 'rpc'
         await pending.answer(keepPlanningAnswer(reviewId, declineLabel, message))
         setOpen(false)
+        if (remote) await pending.dismiss()
       } catch (cause) {
         waiting.current = false
         setBusy(false)

@@ -23,7 +23,7 @@ const planCarrier = (overrides: Record<string, unknown> = {}) => ({
   sessionId: 's1',
   questions: planQuestions(),
   answer: async () => {},
-  cancel: async () => {},
+  dismiss: async () => {},
   ...overrides,
 })
 
@@ -117,9 +117,9 @@ describe('parsePlanReview', () => {
     })), undefined)
   })
 
-  it('rejects a missing cancel', () => {
+  it('rejects a missing dismiss', () => {
     const carrier = planCarrier()
-    const { cancel: _cancel, ...rest } = carrier
+    const { dismiss: _dismiss, ...rest } = carrier
     assert.equal(parsePlanReview(rest), undefined)
   })
 })
