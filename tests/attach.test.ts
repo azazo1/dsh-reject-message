@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { ToolExecution, ToolExecutionResult } from '@deepseek-ai/dsh-tools'
-import { appendRejectContent, attachRejectMessage } from '../src/attach.ts'
+import { prependRejectContent, attachRejectMessage } from '../src/attach.ts'
 import { formatRejectNote } from '../src/shared.ts'
 import { RejectMessageStore } from '../src/store.ts'
 
@@ -32,14 +32,14 @@ const RETRYABLE_REJECTION = 'the user rejected escalating this command to "dange
   + 'if this command is still necessary, re-request it with a clearer justification, '
   + 'though a repeat ask may be rejected again'
 
-describe('appendRejectContent', () => {
-  it('appends to the last text block', () => {
-    const next = appendRejectContent([{ type: 'text', text: 'denied' }], 'note')
-    assert.deepEqual(next, [{ type: 'text', text: 'denied\n\nnote' }])
+describe('prependRejectContent', () => {
+  it('prepends to the first text block', () => {
+    const next = prependRejectContent([{ type: 'text', text: 'denied' }], 'note')
+    assert.deepEqual(next, [{ type: 'text', text: 'note\n\ndenied' }])
   })
 
-  it('adds a text block when the last block is not text', () => {
-    const next = appendRejectContent([], 'note')
+  it('adds a text block when there is no text block to merge into', () => {
+    const next = prependRejectContent([], 'note')
     assert.deepEqual(next, [{ type: 'text', text: 'note' }])
   })
 })
@@ -52,7 +52,7 @@ describe('attachRejectMessage', () => {
     assert.equal(attached, downstream)
   })
 
-  it('appends the description to an error result', () => {
+  it('prepends the description to an error result', () => {
     const store = new RejectMessageStore(1000)
     store.put(store.key('s1', 'bash', 'c1'), 'stay in workspace')
     const attached = attachRejectMessage(
@@ -68,8 +68,8 @@ describe('attachRejectMessage', () => {
     const text = attached.content?.[0]
     assert.equal(text?.type, 'text')
     if (text?.type !== 'text') throw new Error('expected text')
+    assert.equal(text.text.startsWith(formatRejectNote('bash', 'stay in workspace')), true)
     assert.equal(text.text.includes('the user rejected tool "bash"'), true)
-    assert.equal(text.text.includes(formatRejectNote('bash', 'stay in workspace')), true)
     assert.equal(attached.additionalContexts?.length, 1)
   })
 
@@ -87,7 +87,7 @@ describe('attachRejectMessage', () => {
     })
   })
 
-  it('rewrites the tail in place and keeps the appended description', () => {
+  it('prepends the description ahead of a rewritten tail', () => {
     const store = new RejectMessageStore(1000)
     store.put(store.key('s1', 'bash', 'c3'), '提权干什么')
     const attached = attachRejectMessage(
@@ -101,9 +101,9 @@ describe('attachRejectMessage', () => {
     }
     const text = attached.content?.[0]
     if (text?.type !== 'text') throw new Error('expected text')
+    assert.equal(text.text.startsWith(formatRejectNote('bash', '提权干什么')), true)
     assert.equal(text.text.includes(RETRYABLE_REJECTION), true)
     assert.equal(text.text.includes('it stays denied'), false)
-    assert.equal(text.text.includes(formatRejectNote('bash', '提权干什么')), true)
     assert.equal(attached.additionalContexts?.length, 1)
   })
 

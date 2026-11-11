@@ -80,11 +80,12 @@ export function normalizeRejectMessage(value: unknown, maxLength = DEFAULT_MAX_L
 
 /**
  * 模型可见的拒绝描述正文. 工具结果和 additionalContexts 共用这段英文.
+ * 句首直接点明这是用户自己的话, 并放在工具结果开头, 避免被当作附注略过.
  * @param toolName - 被拒绝的工具名.
  * @param message - 已经规范化的拒绝描述.
  */
 export function formatRejectNote(toolName: string, message: string): string {
-  return `The user rejected this privileged request for tool "${toolName}" with this description:\n${message}`
+  return `The user rejected this request for tool "${toolName}". The user's own description:\n${message}`
 }
 
 function asNonEmptyString(value: unknown, label: string): string {

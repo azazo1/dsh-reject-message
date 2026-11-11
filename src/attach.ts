@@ -1,6 +1,6 @@
 /**
  * 把暂存的拒绝描述折进 tools/post-execute 决策, 并改写宿主那句 "拒绝即终结" 的尾句.
- * 错误结果会把描述追加到模型可见 content, 并额外挂一条 additionalContext.
+ * 错误结果会把描述插到模型可见 content 开头, 并额外挂一条 additionalContext.
  */
 
 import { createUserMessage, type ContentBlock } from '@deepseek-ai/dsh-llm'
@@ -16,15 +16,15 @@ export function sessionIdOf(exec: Pick<ToolExecution, 'agent'>): string | undefi
 }
 
 /**
- * 把一段拒绝描述追加到已有 content blocks 末尾.
- * 末块是 text 时直接拼接, 否则再开一块, 避免打散原有投影.
+ * 把一段拒绝描述插到已有 content blocks 开头.
+ * 描述排在错误正文之前, 模型先读到用户的真实意思, 而不是把它当成附注掠过.
  */
-export function appendRejectContent(content: readonly ContentBlock[], note: string): ContentBlock[] {
-  const last = content[content.length - 1]
-  if (last !== undefined && last.type === 'text') {
-    return [...content.slice(0, -1), { type: 'text', text: `${last.text}\n\n${note}` }]
+export function prependRejectContent(content: readonly ContentBlock[], note: string): ContentBlock[] {
+  const first = content[0]
+  if (first !== undefined && first.type === 'text') {
+    return [{ type: 'text', text: `${note}\n\n${first.text}` }, ...content.slice(1)]
   }
-  return [...content, { type: 'text', text: note }]
+  return [{ type: 'text', text: note }, ...content]
 }
 
 function existingContexts(decision: PostToolDecision): NonNullable<PostToolDecision['additionalContexts']> {
@@ -77,7 +77,7 @@ export function attachRejectMessage(
   const rewritten = rewriteEscalationTailBlocks(baseContent)
   const content = noteText === undefined
     ? rewritten
-    : appendRejectContent(rewritten ?? baseContent, noteText)
+    : prependRejectContent(rewritten ?? baseContent, noteText)
   if (content === undefined) return withContexts(downstream, contexts)
   return contexts.length === 0
     ? { kind: 'accept', content }
